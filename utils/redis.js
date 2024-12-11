@@ -1,14 +1,11 @@
 import redis from 'redis';
+import { promisify } from 'util';
 
 class RedisClient {
   constructor() {
-    // Create a Redis client using redis@2.8.0
     this.client = redis.createClient();
-
-    // Handle Redis client connection errors
-    this.client.on('error', (error) => {
-      console.error('Redis client error:', error);
-    });
+    this.client.on('error', (err) => console.error('Redis error:', err));
+    this.get = promisify(this.client.get).bind(this);
   }
 
   /**
