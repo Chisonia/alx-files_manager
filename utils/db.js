@@ -18,13 +18,13 @@ class DBClient {
         console.log('MongoDB connected successfully');
       })
       .catch((error) => {
-        console.error('MongoDB connection error:', error);
+        console.error('MongoDB connection error:', error.message);
       });
   }
 
   /**
    * Check if the connection to MongoDB is alive
-   * @returns {boolean} - True if connected, otherwise false
+   * @returns {Promise<boolean>} - True if connected, otherwise false
    */
   async isAlive() {
     try {
@@ -32,7 +32,7 @@ class DBClient {
       await this.client.db('admin').command({ ping: 1 });
       return true;
     } catch (error) {
-      console.error('MongoDB ping failed:', error);
+      console.error('MongoDB ping failed:', error.message);
       return false;
     }
   }
@@ -43,10 +43,12 @@ class DBClient {
    */
   async nbUsers() {
     try {
-      if (!this.db) throw new Error('Database not connected');
-      return await this.db.collection('users').countDocuments();
+      if (!this.db) {
+        throw new Error('Database not connected');
+      }
+      return this.db.collection('users').countDocuments();
     } catch (error) {
-      console.error('Error fetching user count:', error);
+      console.error('Error fetching user count:', error.message);
       return 0;
     }
   }
@@ -57,10 +59,12 @@ class DBClient {
    */
   async nbFiles() {
     try {
-      if (!this.db) throw new Error('Database not connected');
-      return await this.db.collection('files').countDocuments();
+      if (!this.db) {
+        throw new Error('Database not connected');
+      }
+      return this.db.collection('files').countDocuments();
     } catch (error) {
-      console.error('Error fetching file count:', error);
+      console.error('Error fetching file count:', error.message);
       return 0;
     }
   }
