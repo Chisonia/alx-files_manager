@@ -1,6 +1,6 @@
-import { ObjectId } from 'mongodb';
-import sha1 from 'sha1';
-import dbClient from '../utils/db.js';
+#!/usr/bin/node
+
+const dbClient = require('../utils/db');
 
 class UsersController {
   /**
@@ -13,30 +13,37 @@ class UsersController {
 
     // Validate email
     if (!email) {
-      return res.status(400).json({ error: 'Missing email' });
+      res.status(400).json({ error: 'Missing email' });
+      res.end();
+      return;
     }
 
     // Validate password
     if (!password) {
-      return res.status(400).json({ error: 'Missing password' });
+      res.status(400).json({ error: 'Missing password' });
+      res.end();
+      return;
     }
 
     // Check if the email already exists
-    const existingUser = await dbClient.db.collection('users').findOne({ email });
+    const existingUser = await dbClient.userExist(email);
     if (existingUser) {
-      return res.status(400).json({ error: 'Already exist' });
+      res.status(400).json({ error: 'Already exist' });
+      res.end();
+      return
     }
 
     // Hash the password
     const hashedPassword = sha1(password);
 
     // Create the new user
-    const newUser = { email, password: hashedPassword };
+    const newUser = await dbClient.createUser(email, hashedPassword);
     const result = await dbClient.db.collection('users').insertOne(newUser);
 
     // Return the response with the created user details
     const userId = result.insertedId;
-    return res.status(201).json({ id: userId, email });
+    res.status(201).json({ id: userId, email });
+    res.end();
   }
 }
 
